@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>GB27930解析程序</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+</head>
+<body style="background-color: #fff;font-size: 14px;line-height: 1.428;">
+<form role="form">
+    <div class="container" style="margin-top: 5px;">
+
+        <div class="row">
+            <div class="col-md-12 input-group">
+                <span class="input-group-addon">帧  ID：</span>
+                <input type="text" class="form-control" id="framID" style="width: 50%" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 input-group">				
+				<span class="input-group-addon">帧数据：</span>
+                <textarea class="form-control" id="analysisResult" rows="10"></textarea>
+            </div>
+        </div>
+
+		<div class="row">
+            <div class="col-md-12 input-group">								
+                <span class="input-group-btn">
+                    <button id="analysisMsgBtn" type="button" class="btn btn-default">解析</button>
+                </span>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px">
+            <div class="col-md-12">
+                <textarea class="form-control" id="analysisResult" rows="28"></textarea>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    //解析报文开始
+   
+    $("#analysisMsgBtn").on("click", function () {
+     
+        var resultMsg = "";
+        var msg = document.getElementById("analysisMsg").value;
+        //首先去掉报文中的空格
+        msg = msg.replace(/(^\s*)|(\s*$)/g, "");
+        //截取报文中有效的信息
+        msg = msg.substring(2);//截取出报文中的有效信息即从68之后开始
+
+        var msgLength = msg.substring(0,2);
+        var msgType = msg.substring(2,4);
+        msg = msg.substring(4);//截取报文类型及报文长度
+        if (msgType == "20") {
+            msgType = "设备基本信息 ID = 0x20";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x20(msg, resultMsg);
+        } else if (msgType == "23") {
+            msgType = "主动启动用户认证ID = 0x23";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x23(msg, resultMsg);
+        }
+        else if (msgType == "24") {
+            msgType = "主动启动认证结果应答ID = 0x24";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x24(msg, resultMsg);
+        } else if (msgType == "25") {
+            msgType = "预约信息 ID = 0x25";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x25(msg, resultMsg);
+        } else if (msgType == "26") {
+            msgType = "预约返回ID = 0x26";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x26(msg, resultMsg);
+        } else if (msgType == "27") {
+            msgType = "对时指令ID = 0x27";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x27(msg, resultMsg);
+        } else if (msgType == "28") {//充电接口实时状态
+            msgType = "充电接口实时状态";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x28(msg, resultMsg);
+        } else if (msgType == "29") {//充电接口实时状态
+            msgType = "获取设备基本信息";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x29(msg, resultMsg);
+        } else if (msgType == "2a") {
+            msgType = "停机原因上发 = 0x2A";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x2a(msg, resultMsg);
+        } else if (msgType == "2b") {
+            msgType = "获取充电桩实时充电数据ID=0x2B";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x2B(msg, resultMsg);
+        } else if (msgType == "2c") {
+            msgType = "充电桩实时充电数据";
+            resultMsg += "报文长度："+parseInt(msgLength,16)+"\r\n";//报文长度
+            resultMsg += "报文类型："+msgType;//报文类型
+            resultMsg = analysis0x2C(msg,resultMsg);
+        } else if (msgType == "2d") {
+            msgType = "获取充电记录数据ID=0x2D";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x2D(msg, resultMsg);
+        } else if (msgType == "2e") {
+            msgType = "充电设备上传单一费率充电记录ID=0x2E";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x2E(msg, resultMsg);
+        } else if (msgType == "2f") {
+            msgType = "响应充电记录确认ID = 0x2F";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x2F(msg, resultMsg);
+        } else if (msgType == "30") {
+            msgType = "智能模块下发请求充电验证码ID = 0x30";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x30(msg, resultMsg);
+        } else if (msgType == "31") {
+            msgType = "充电设备返回请求充电状态ID = 0x31";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x31(msg, resultMsg);
+        } else if (msgType == "32") {
+            msgType = "充电设备请求下发计费模型0x32";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x32(msg, resultMsg);
+        } else if (msgType == "33") {
+
+            msgType = "智能模块下发计费模型0x33";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x33(msg, resultMsg);
+        } else if (msgType == "34") {
+            msgType = "充电设备上传计费模型更新结果0x34";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x34(msg, resultMsg);
+        } else if (msgType == "35") {
+            msgType = "智能模块查询计费模型，0x35";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x35(msg, resultMsg);
+        } else if (msgType == "36") {
+            msgType = "充电设备上传计费模型，0x36";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x36(msg, resultMsg);
+        } else if (msgType == "37") {
+            msgType = "充电设备上传无卡复费率充电记录";
+            resultMsg += "报文长度："+parseInt(msgLength,16)+"\r\n";//报文长度
+            resultMsg += "报文类型："+msgType;//报文类型
+            resultMsg = analysis0x37(msg,resultMsg);
+        } else if (msgType == "38") {
+            msgType = "充电设备上传有卡复费率充电记录0x38";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x38(msg, resultMsg);
+        } else if (msgType == "39") {
+            msgType = "充电桩定时上传时间ID =0x39";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x39(msg, resultMsg);
+        } else if (msgType == "42") {
+            msgType = "下发负荷调节指令ID = 0x42";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x42(msg, resultMsg);
+        } else if (msgType == "43") {
+            msgType = "充电桩响应负荷调节指令ID = 0x43";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x43(msg, resultMsg);
+        } else if (msgType == "44") {
+            msgType = "远程开关机控制 = 0x44";
+            resultMsg += "报文长度："+parseInt(msgLength,16)+"\r\n";//报文长度
+            resultMsg += "报文类型："+msgType;//报文类型
+            resultMsg = analysis0x44(msg,resultMsg);
+        } else if (msgType == "45") {
+            msgType = "充电机响应开关机控制ID = 0x45";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x45(msg, resultMsg);
+        } else if (msgType == "46") {
+            msgType = "智能模块请求更改桩ID =0x46";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x46(msg, resultMsg);
+        } else if (msgType == "47") {
+            msgType = "充电机返回更改桩请求ID =0x47";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x47(msg, resultMsg);
+        } else if (msgType == "48") {
+            msgType = "充电机上送远程开关机操作结果 ID=0x48";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x48(msg, resultMsg);
+        } else if (msgType == "49") {
+            msgType = "智能模块响应上送操作结果 ID=0x49";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x49(msg, resultMsg);
+        } else if (msgType == "4a") {
+            msgType = "智能模块读取充电桩实时状态 ID=0x4A";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x4A(msg, resultMsg);
+        } else if (msgType == "4b") {
+            msgType = "主站下发打开门锁指令 ID=0x4B";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x4B(msg, resultMsg);
+        } else if (msgType == "4c") {
+            msgType = "设备响应打开门锁指令 ID=0x4C";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x4C(msg, resultMsg);
+        } else if (msgType == "4d") {
+            msgType = "主站下发打开地锁指令 ID=0x4D";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x4D(msg, resultMsg);
+        } else if (msgType == "4e") {
+            msgType = "设备响应打开地锁指令 ID=0x4E";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x4E(msg, resultMsg);
+        } else if (msgType == "50") {
+            msgType = "远程地锁控制ID = 0x50";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x50(msg, resultMsg);
+        } else if (msgType == "51") {
+            msgType = "远程地锁控制响应ID = 0x51";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x51(msg, resultMsg);
+        } else if (msgType == "55") {
+            msgType = "上报停车记录ID = 0x55";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x55(msg, resultMsg);
+        } else if (msgType == "5f") {
+            msgType = "响应停车记录确认ID = 0x5F";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x5F(msg, resultMsg);
+        } else if (msgType == "9f") {
+            msgType = "充电桩返回错误指令 ID=0x9F";
+            resultMsg += "报文长度：" + parseInt(msgLength, 16) + "\r\n";//报文长度
+            resultMsg += "报文类型：" + msgType;//报文类型
+            resultMsg = analysis0x9F(msg, resultMsg);
+        } 
+        document.getElementById("analysisResult").value = resultMsg;
+    }
+    )
+    
+</script>
+</form>
+</body>
+</html>
