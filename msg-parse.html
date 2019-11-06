@@ -130,7 +130,8 @@
         var resultMsg = "";
         var msg = document.getElementById("analysisMsg").value;
         //首先去掉报文中的空格
-        msg = msg.replace(/(^\s*)|(\s*$)/g, "");
+        //msg = msg.replace(/(^\s*)|(\s*$)/g, "");
+        msg = msg.replace(/\s*/g,"");
         //截取报文中有效的信息
         msg = msg.substring(2);//截取出报文中的有效信息即从68之后开始
 
